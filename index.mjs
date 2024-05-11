@@ -15,12 +15,12 @@ pkg.init({ dir: 'persist' }).then(() => {
     console.error('Error initializing storage:', error);
 });
 
-// Токен вашего бота Telegram
-const token = '6757796948:AAHoy8898QJVJ9ihyDZZ4uicCImvfSD_Lhc';
+
+const token = token;
 
 
 
-// Создаем экземпляр бота
+
 const bot = new TelegramBot(token, { polling: true });
 
 const apiKey = 'f947840eff582e7f0cd7c674041b6a16';
@@ -29,7 +29,7 @@ const lon = '23.98522';
 const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&lang=ua`;
 
 
-// Обработчик команды /start
+
 bot.onText(/\/start/, async (msg) => {
     const chatId = msg.chat.id;
     await pkg.setItem('chatId', chatId);
