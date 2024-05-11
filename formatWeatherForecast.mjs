@@ -17,7 +17,7 @@ function formatWeatherForecast(weatherData) {
 
         const day = date.toLocaleDateString('uk-UA', { weekday: 'long', day: 'numeric', month: 'long' });
 
-        // Если текущий день отличается от предыдущего, добавляем его перед прогнозом
+        
         if (day !== currentDay) {
             currentDay = day;
             formattedForecast += `\n${currentDay}:\n`;

@@ -1,4 +1,4 @@
-// Функция для загрузки данных JSON по ссылке
+
 function fetchWeatherData(url) {
     return fetch(url)
         .then(response => {

@@ -7,10 +7,10 @@ require('dotenv').config();
 const token = process.env.TOKEN;
 const apiKey = process.env.API_KEY;
 
-import fetchWeatherData from './fetchWeatherData.mjs';
-import formatWeatherForecast from './formatWeatherForecast.mjs';
-import TelegramBot from 'node-telegram-bot-api';
-import pkg from 'node-persist';
+const fetchWeatherData = require('./fetchWeatherData.mjs');
+const formatWeatherForecast = require('./formatWeatherForecast.mjs');
+const TelegramBot = require('node-telegram-bot-api');
+const pkg = require('node-persist');
 const { init, getItem, setItem } = pkg;
 
 
@@ -45,7 +45,7 @@ bot.onText(/\/start/, async (msg) => {
     await pkg.setItem('chatId', chatId);
 
 
-    // Отправляем сообщение с основным меню
+    
     bot.sendMessage(chatId, 'Выберите действие:', {
         reply_markup: {
             inline_keyboard: [
@@ -55,16 +55,16 @@ bot.onText(/\/start/, async (msg) => {
     });
 });
 
-// Обработчик нажатий на кнопки
+
 bot.on('callback_query', async (callbackQuery) => {
     const chatId = callbackQuery.message.chat.id;
     const action = callbackQuery.data;
     await pkg.setItem('chatId', chatId);
 
 
-    // Обработка нажатия на кнопку "Weather forecast in mykolaiv"
+    
     if (action === 'Mykolaiv') {
-        // Отправляем сообщение с подменю
+        
         bot.sendMessage(chatId, 'Выберите интервал прогноза:', {
             reply_markup: {
                 inline_keyboard: [
@@ -83,7 +83,7 @@ bot.on('callback_query', async (callbackQuery) => {
         console.log('Пользователь выбрал прогноз с интервалом 3 часа.');
     }
 
-    // Обработка нажатия на кнопку "With a 6-hour interval"
+    
     if (action === '6hours') {
         intervalInHours = 6; 
         bot.sendMessage(chatId, 'Вы выбрали прогноз погоды с интервалом в 6 часов');
