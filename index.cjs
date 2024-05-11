@@ -1,8 +1,18 @@
+
+
+require = require('esm')(module);
+
+require('dotenv').config();
+
+const token = process.env.TOKEN;
+const apiKey = process.env.API_KEY;
+
 import fetchWeatherData from './fetchWeatherData.mjs';
 import formatWeatherForecast from './formatWeatherForecast.mjs';
 import TelegramBot from 'node-telegram-bot-api';
 import pkg from 'node-persist';
 const { init, getItem, setItem } = pkg;
+
 
 
 let intervalId;
@@ -16,14 +26,14 @@ pkg.init({ dir: 'persist' }).then(() => {
 });
 
 
-const token = token;
+
 
 
 
 
 const bot = new TelegramBot(token, { polling: true });
 
-const apiKey = 'f947840eff582e7f0cd7c674041b6a16';
+
 const lat = '49.52372';
 const lon = '23.98522';
 const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&lang=ua`;
