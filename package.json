@@ -5,7 +5,8 @@
     "node-telegram-bot-api": "^0.65.1",
     "socket.io": "^4.7.5",
     "dotenv": "^16.4.5",
-    "esm": "^3.2.25"
+    "esm": "^3.2.25",
+    "node-cron": "^3.0.3"
   },
   "engines": {
     "node": "14.x"

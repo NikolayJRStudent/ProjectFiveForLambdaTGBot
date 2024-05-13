@@ -10,6 +10,7 @@ const formatWeatherForecast = require("./formatWeatherForecast.mjs");
 const TelegramBot = require("node-telegram-bot-api");
 const pkg = require("node-persist");
 const { init, getItem, setItem } = pkg;
+const cron = require('node-cron');
 
 let intervalId;
 
@@ -73,7 +74,7 @@ bot.on("callback_query", async (callbackQuery) => {
     console.log("Пользователь выбрал прогноз с интервалом 6 часов.");
   }
 
-  intervalId = setInterval(async () => {
+  cron.schedule(`0 */${intervalInHours} * * *`, async () => {
     const chatId = await pkg.getItem("chatId");
     fetchWeatherData(url)
       .then((weatherData) => {
@@ -83,5 +84,7 @@ bot.on("callback_query", async (callbackQuery) => {
       .catch((error) => {
         console.error("Error fetching weather data:", error);
       });
-  }, intervalInHours * 60 * 60 * 1000);
+  }, {
+    timezone: 'Europe/Kiev' 
+  });
 });
