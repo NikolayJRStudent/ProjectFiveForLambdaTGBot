@@ -1,15 +1,23 @@
+import axios from 'axios';
+
+import formatWeatherForecast from "./formatWeatherForecast.mjs";
 
 
+const handleSocketEvents = async (io, pkg, bot, url) => {
+  console.log('Запуск прогноза погоды');
 
-const handleSocketEvents = (io) => {
-  io.on('connection', (socket) => {
-    console.log('Подключение сокета:', socket.id);
-
-    socket.on('startForecast', () => {
-      console.log('Запуск прогноза погоды');
-      // В этом месте вы можете выполнить задачу отправки прогноза погоды
-    });
-  });
+ 
+    const chatId = await pkg.getItem("chatId");
+    axios.get(url)
+      .then((response) => {
+        const weatherData = response.data;
+        const formattedForecast = formatWeatherForecast(weatherData);
+        bot.sendMessage(chatId, formattedForecast);
+      })
+      .catch((error) => {
+        console.error("Error fetching weather data:", error);
+      });
+  
 };
 
-module.exports = handleSocketEvents;
+export default handleSocketEvents;
