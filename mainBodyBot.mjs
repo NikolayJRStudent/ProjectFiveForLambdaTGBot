@@ -1,71 +1,77 @@
 import pkg from "node-persist";
 import io from "socket.io-client";
-
 import TelegramBot from "node-telegram-bot-api";
 import handleCallbackQuery from "./handleCallbackQuery.mjs";
 import handleSocketEvents from "./socketHandler.mjs";
 import dotenv from "dotenv";
 
-
-const port = process.env.PORT || 3000;
-
-const socket = io(`http://localhost:${port}`);
-
-
-
 dotenv.config();
+
+// Ініціалізація node-persist
+await pkg.init();
+
+const bot = new TelegramBot(process.env.TOKEN, { polling: true });
+const socket = io(`https://prong-helix-crater.glitch.me`);
 
 const apiKey = process.env.API_KEY;
 const lat = "49.52372";
 const lon = "23.98522";
 const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&lang=ua`;
 
-// Инициализация node-persist
-const { init, setItem } = pkg;
-init({ dir: "persist" })
-  .then(() => {
-    console.log("Storage initialized successfully");
-  })
-  .catch((error) => {
-    console.error("Error initializing storage:", error);
-  });
-
-const bot = new TelegramBot(process.env.TOKEN, { polling: true });
-
-// Обработка команды /start от пользователя
 bot.onText(/\/start/, async (msg) => {
-  
-  const chatId = await pkg.getItem('chatId');
-  await pkg.setItem('chatId', chatId);
-  bot.sendMessage(chatId, "Выберите действие:", {
+  const chatId = msg.chat.id;
+
+  // Збереження chatId в node-persist
+  await pkg.setItem("chatId", chatId);
+
+  bot.sendMessage(chatId, "Choose an action:", {
     reply_markup: {
-      inline_keyboard: [
-        [{ text: "Weather forecast in Mykolaiv", callback_data: "Mykolaiv" }],
+      keyboard: [
+        [{ text: "Weather forecast in Mykolaiv" }]
       ],
-    },
+      resize_keyboard: true,
+      one_time_keyboard: true
+    }
   });
 });
 
-// Обработка события callback_query от пользователя
-bot.on("callback_query", async (callbackQuery) => {
-  // Обработка callback_query
-  let { intervalId, intervalInHours } = await handleCallbackQuery(
-    bot,
-    pkg,
-    callbackQuery
-  );
-  intervalId = setInterval(async () => {
-    await handleSocketEvents(io, pkg, bot, url);
-  }, 2 * 60 * 60 * 1000);
+// Обробка текстових повідомлень від користувача
+bot.on('message', async (msg) => {
+  const chatId = msg.chat.id;
+  const text = msg.text;
+
+  if (text === 'Weather forecast in Mykolaiv') {
+    await bot.sendMessage(chatId, "Select forecast interval:", {
+      reply_markup: {
+        keyboard: [
+          [{ text: "With a 3-hour interval" }],
+          [{ text: "With a 6-hour interval" }]
+        ],
+        resize_keyboard: true,
+        one_time_keyboard: true
+      }
+    });
+    
+  } else if (text === 'With a 3-hour interval' || text === 'With a 6-hour interval') {
+    const interval = text === 'With a 3-hour interval' ? '3hours' : '6hours';
+    const callbackQuery = { message: { chat: { id: chatId } }, data: interval };
+    const { intervalId, intervalInHours } = await handleCallbackQuery(bot, callbackQuery);
+
+    await bot.sendMessage(chatId, `You have selected a weather forecast with an interval of ${intervalInHours} hours.`, {
+      reply_markup: {
+        keyboard: [
+          [{ text: "With a 3-hour interval" }],
+          [{ text: "With a 6-hour interval" }]
+        ]
+      }
+    });
+
+    setInterval(async () => {
+      await handleSocketEvents(io, pkg, bot, url);
+    }, intervalInHours * 60 * 60 * 1000);
+  }
 });
 
 socket.on("keep-alive", () => {
-  console.log("Продлление сессии");
+  console.log("Session extension");
 });
-
-
-
-
-
-
-

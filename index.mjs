@@ -4,28 +4,37 @@ import express from 'express';
 import { Server } from 'socket.io';
 
 
-// Инициализация приложения Express и создание HTTP-сервера
+
 const app = express(); 
 const http = createServer(app);
 
-// Создание экземпляра сокета
-const io = new Server(http);
 
-// Установка порта для прослушивания HTTP-сервера
-const port = process.env.PORT || 3000;
-http.listen(port, () => {
-  console.log(`Сервер с сокетами запущен на порту ${port}`);
+const io = new Server(http, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
 });
 
+const port = process.env.PORT;
+http.listen(port, () => {
+  console.log(`The socket server is running on the port ${port}`);
+});
+
+app.get('/', (req, res) => {
+  res.send('The server is running!');
+});
+
+
 io.on('connection', (socket) => {
-  console.log('Подключение к сокету');
+  console.log('Connecting to a socket');
   
   const keepAliveInterval = setInterval(() => {
     socket.emit('keep-alive');
-  }, 5* 60 * 1000);
+  }, 4 * 60 * 1000);
   
   socket.on('disconnect', () => {
-    console.log('Отключение от сокета');
+    console.log('Disconnecting from a socket');
     clearInterval(keepAliveInterval);
   });
 
